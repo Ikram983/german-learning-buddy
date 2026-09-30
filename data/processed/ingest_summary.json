@@ -1,0 +1,6 @@
+{
+  "total_documents": 633,
+  "grammar_chunks": 445,
+  "vocab_chunks": 188,
+  "embedding_model": "all-MiniLM-L6-v2"
+}

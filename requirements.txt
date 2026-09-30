@@ -1,0 +1,10 @@
+chromadb
+sentence-transformers
+pypdf
+langgraph
+langchain-core
+langchain-openai
+python-dotenv
+tqdm
+pytest
+reportlab  # only used by tests/make_sample_pdf.py to generate a fake test PDF
