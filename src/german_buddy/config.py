@@ -1,11 +1,3 @@
-"""Central, env-driven settings for the German Learning Buddy.
-
-Same pattern as the fitness-coach project: everything configurable lives
-here, everything else imports from here instead of reading os.environ
-directly.
-"""
-# src/german_buddy/config.py
-# src/german_buddy/config.py
 # src/german_buddy/config.py
 from __future__ import annotations
 
@@ -32,8 +24,12 @@ def _get(key: str, default: str = "") -> str:
 # ============================================================
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
-PROCESSED_DIR = DATA_DIR / "processed"
+DATA_PROCESSED_DIR = DATA_DIR / "processed"
 VECTORSTORE_DIR = PROJECT_ROOT / "vectorstore"
+
+# PDF source files — adjust these paths to match your actual data folder
+GRAMMAR_PDF = DATA_DIR / "grammar.pdf"
+VOCAB_PDF = DATA_DIR / "vocab.pdf"
 
 
 # ============================================================
