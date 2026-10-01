@@ -5,44 +5,41 @@ here, everything else imports from here instead of reading os.environ
 directly.
 """
 # src/german_buddy/config.py
+# src/german_buddy/config.py
 from __future__ import annotations
 
 import os
-from pydantic_settings import BaseSettings
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
-def _load_streamlit_secrets() -> dict:
-    """Load secrets from Streamlit Cloud if available."""
+def _get(key: str, default: str = "") -> str:
+    """
+    Read a setting from (in order):
+    1. Streamlit secrets (cloud)
+    2. Environment variables (.env locally)
+    3. Default value
+    """
+    # 1. Try Streamlit secrets
     try:
         import streamlit as st
-        # st.secrets behaves like a dict
-        return dict(st.secrets)
+        if key in st.secrets:
+            return str(st.secrets[key])
     except Exception:
-        return {}
+        pass
+
+    # 2. Try environment variables
+    return os.getenv(key, default)
 
 
-class Settings(BaseSettings):
-    llm_provider: str = "deepseek"
-    deepseek_api_key: str = ""
-    deepseek_model: str = "deepseek-chat"
-    deepseek_base_url: str = "https://api.deepseek.com/v1"
-    openai_api_key: str = ""
-    openai_model: str = "gpt-4o-mini"
-
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+class Settings:
+    llm_provider: str = _get("LLM_PROVIDER", "deepseek")
+    deepseek_api_key: str = _get("DEEPSEEK_API_KEY", "")
+    deepseek_model: str = _get("DEEPSEEK_MODEL", "deepseek-chat")
+    deepseek_base_url: str = _get("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
+    openai_api_key: str = _get("OPENAI_API_KEY", "")
+    openai_model: str = _get("OPENAI_MODEL", "gpt-4o-mini")
 
 
-# 1. Try .env first (local)
 settings = Settings()
-
-# 2. Override with Streamlit secrets if present (cloud)
-_secrets = _load_streamlit_secrets()
-if _secrets:
-    if "DEEPSEEK_API_KEY" in _secrets:
-        settings.deepseek_api_key = _secrets["DEEPSEEK_API_KEY"]
-    if "DEEPSEEK_MODEL" in _secrets:
-        settings.deepseek_model = _secrets["DEEPSEEK_MODEL"]
-    if "LLM_PROVIDER" in _secrets:
-        settings.llm_provider = _secrets["LLM_PROVIDER"]
