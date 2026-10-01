@@ -27,7 +27,7 @@ DATA_DIR = PROJECT_ROOT / "data"
 DATA_PROCESSED_DIR = DATA_DIR / "processed"
 VECTORSTORE_DIR = PROJECT_ROOT / "vectorstore"
 
-# PDF source files — adjust these paths to match your actual data folder
+# PDF sources — adjust to match your actual filenames
 GRAMMAR_PDF = DATA_DIR / "grammar.pdf"
 VOCAB_PDF = DATA_DIR / "vocab.pdf"
 
@@ -36,7 +36,7 @@ VOCAB_PDF = DATA_DIR / "vocab.pdf"
 # Settings
 # ============================================================
 class Settings:
-    # LLM
+    # --- LLM ---
     llm_provider: str = _get("LLM_PROVIDER", "deepseek")
     deepseek_api_key: str = _get("DEEPSEEK_API_KEY", "")
     deepseek_model: str = _get("DEEPSEEK_MODEL", "deepseek-chat")
@@ -44,10 +44,14 @@ class Settings:
     openai_api_key: str = _get("OPENAI_API_KEY", "")
     openai_model: str = _get("OPENAI_MODEL", "gpt-4o-mini")
 
-    # Retrieval / RAG
+    # --- Retrieval / RAG ---
     top_k: int = 4
     embedding_model: str = "all-MiniLM-L6-v2"
     collection_name: str = "german_buddy"
+
+    # --- Ingestion / chunking ---
     chunk_size: int = 500
     chunk_overlap: int = 50
+
+
 settings = Settings()
