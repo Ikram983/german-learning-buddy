@@ -6,33 +6,39 @@ directly.
 """
 # src/german_buddy/config.py
 # src/german_buddy/config.py
+# src/german_buddy/config.py
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
 
 
 def _get(key: str, default: str = "") -> str:
-    """
-    Read a setting from (in order):
-    1. Streamlit secrets (cloud)
-    2. Environment variables (.env locally)
-    3. Default value
-    """
-    # 1. Try Streamlit secrets
+    """Read from st.secrets first, then env vars, then default."""
     try:
         import streamlit as st
         if key in st.secrets:
             return str(st.secrets[key])
     except Exception:
         pass
-
-    # 2. Try environment variables
     return os.getenv(key, default)
 
 
+# ============================================================
+# Paths
+# ============================================================
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+DATA_DIR = PROJECT_ROOT / "data"
+PROCESSED_DIR = DATA_DIR / "processed"
+VECTORSTORE_DIR = PROJECT_ROOT / "vectorstore"
+
+
+# ============================================================
+# Settings
+# ============================================================
 class Settings:
     llm_provider: str = _get("LLM_PROVIDER", "deepseek")
     deepseek_api_key: str = _get("DEEPSEEK_API_KEY", "")
