@@ -4,48 +4,45 @@ Same pattern as the fitness-coach project: everything configurable lives
 here, everything else imports from here instead of reading os.environ
 directly.
 """
-
+# src/german_buddy/config.py
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
-from pathlib import Path
-
-# Load .env if python-dotenv is installed (optional but recommended).
-try:
-    from dotenv import load_dotenv
-
-    load_dotenv()
-except ImportError:
-    pass
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DATA_RAW_DIR = PROJECT_ROOT / "data" / "raw"
-DATA_PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
-VECTORSTORE_DIR = PROJECT_ROOT / "vectorstore"
-
-# The two PDF source books. Rename your files to match, or change these.
-GRAMMAR_PDF = DATA_RAW_DIR / "Basic german.pdf"
-VOCAB_PDF = DATA_RAW_DIR / "Goethe-Zertifikat_A2_Wortliste (1).pdf"
+from pydantic_settings import BaseSettings
 
 
-@dataclass
-class Settings:
-    llm_provider: str = os.getenv("LLM_PROVIDER", "deepseek")
-    deepseek_api_key: str = os.getenv("DEEPSEEK_API_KEY", "")
-    deepseek_model: str = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
-    deepseek_base_url: str = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
-
-    openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
-    openai_model: str = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-
-    embedding_model: str = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
-    collection_name: str = os.getenv("COLLECTION_NAME", "german_buddy")
-
-    chunk_size: int = int(os.getenv("CHUNK_SIZE", "800"))
-    chunk_overlap: int = int(os.getenv("CHUNK_OVERLAP", "100"))
-
-    top_k: int = int(os.getenv("RETRIEVAL_TOP_K", "4"))
+def _load_streamlit_secrets() -> dict:
+    """Load secrets from Streamlit Cloud if available."""
+    try:
+        import streamlit as st
+        # st.secrets behaves like a dict
+        return dict(st.secrets)
+    except Exception:
+        return {}
 
 
+class Settings(BaseSettings):
+    llm_provider: str = "deepseek"
+    deepseek_api_key: str = ""
+    deepseek_model: str = "deepseek-chat"
+    deepseek_base_url: str = "https://api.deepseek.com/v1"
+    openai_api_key: str = ""
+    openai_model: str = "gpt-4o-mini"
+
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+
+
+# 1. Try .env first (local)
 settings = Settings()
+
+# 2. Override with Streamlit secrets if present (cloud)
+_secrets = _load_streamlit_secrets()
+if _secrets:
+    if "DEEPSEEK_API_KEY" in _secrets:
+        settings.deepseek_api_key = _secrets["DEEPSEEK_API_KEY"]
+    if "DEEPSEEK_MODEL" in _secrets:
+        settings.deepseek_model = _secrets["DEEPSEEK_MODEL"]
+    if "LLM_PROVIDER" in _secrets:
+        settings.llm_provider = _secrets["LLM_PROVIDER"]
